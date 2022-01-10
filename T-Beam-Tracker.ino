@@ -7,7 +7,7 @@
 #include <TinyGPS++.h>
 #include <axp20x.h>     // https://github.com/lewisxhe/AXP202X_Library
 #include "SSD1306Wire.h"      
-#include "atms.h"
+#include "atms/atms.h"
 
 TinyGPSPlus gps;
 AXP20X_Class axp;
@@ -224,12 +224,12 @@ void SendLocation()
   LoRa.print(callsign);
   LoRa.write(ssid | 0x80);
   LoRa.write(seqNum++);
-  LoRa.write(PKT_TYPE_POSITION);
+  LoRa.write(ATMS::PacketType::Position);
 
   LoRa.write((uint8_t)gps.location.rawLat().deg);
   uint32_t millionths = gps.location.rawLat().billionths / 1000;
   uint8_t temp = (millionths >> 16) & 0x0F;
-  if (gps.location.rawLat().negative) temp |= FLAG_LAT_SOUTH;
+  if (gps.location.rawLat().negative) temp |= ATMS::Flag::South;
   LoRa.write(temp);
   LoRa.write((uint8_t)(millionths >> 8));
   LoRa.write((uint8_t)millionths);
@@ -237,7 +237,7 @@ void SendLocation()
   LoRa.write((uint8_t)gps.location.rawLng().deg);
   millionths = gps.location.rawLng().billionths / 1000;
   temp = (millionths >> 16) & 0x0F;
-  if (gps.location.rawLng().negative) temp |= FLAG_LON_WEST;
+  if (gps.location.rawLng().negative) temp |= ATMS::Flag::West;
   LoRa.write(temp);
   LoRa.write((uint8_t)(millionths >> 8));
   LoRa.write((uint8_t)millionths);
@@ -258,7 +258,7 @@ void SendComment()
   LoRa.print(callsign);
   LoRa.write(ssid | 0x80);
   LoRa.write(seqNum++);
-  LoRa.write(PKT_TYPE_COMMENT);
+  LoRa.write(ATMS::PacketType::Comment);
   LoRa.print(comment);
   LoRa.endPacket();
   digitalWrite(redLED, HIGH); // Turn red LED off
